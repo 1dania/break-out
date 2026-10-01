@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Break Out</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050d33;--card:#101a4d;--pink:#ff5fa2;--yel:#ffcc00;--lav:#c9b6ff;--txt:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:#020620;color:var(--txt);font-family:Poppins,system-ui,sans-serif;display:flex;justify-content:center}
+#appwrap{width:100%;max-width:420px;min-height:100vh;position:relative;overflow:hidden;background:var(--bg)}
+#deco{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.d-ring{position:absolute;border:3px solid rgba(255,255,255,.18);border-radius:50%;animation:float 7s ease-in-out infinite}
+.d-q{position:absolute;color:rgba(255,95,162,.25);font-family:Fredoka,sans-serif;font-weight:700;animation:float2 6s ease-in-out infinite}
+.d-dot{position:absolute;background:rgba(255,204,0,.18);border-radius:50%;animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-14px) rotate(8deg)}}
+@keyframes float2{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(16px) rotate(6deg)}}
+#app{position:relative;z-index:1;padding:20px;display:flex;flex-direction:column;min-height:100vh}
+h1,h2,.logo{font-family:Fredoka,system-ui,sans-serif;margin:0}
+.logo{font-size:44px;line-height:.9;color:var(--pink);text-align:center;-webkit-text-stroke:2px #fff;paint-order:stroke fill;text-shadow:3px 3px 0 #ff9cc8}
+h2{font-size:23px;color:var(--yel);margin:14px 0 4px}
+p.sub{color:var(--lav);margin:0 0 16px;font-size:14px}
+.crumb{color:var(--lav);font-size:12px;margin-bottom:6px}
+.top{display:flex;align-items:center;gap:8px;min-height:36px}
+.back{background:none;border:0;color:var(--yel);font-size:15px;cursor:pointer;font-family:inherit;padding:0}
+.dots{margin-left:auto;display:flex;gap:6px}.dots i{width:20px;height:5px;border-radius:3px;background:#2a3673}.dots i.on{background:var(--pink)}
+.card,.opt{background:var(--card);border:2px solid #24307a;border-radius:18px;padding:16px;color:#fff;font-family:inherit;text-align:left;width:100%;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;gap:14px;font-size:16px}
+.opt:hover,.opt:active{border-color:var(--pink)}
+.opt .e{font-size:28px;flex-shrink:0}.opt b{display:block}.opt small{color:var(--lav)}
+.btn{background:var(--pink);color:#fff;border:0;border-radius:16px;padding:15px;font:600 16px Poppins,sans-serif;cursor:pointer;width:100%;margin-top:auto}
+.btn.secondary{background:#24307a}
+.btn:hover{filter:brightness(1.1)}
+.time{display:flex;gap:12px;justify-content:center;margin:10px 0}
+.box{background:var(--card);border-radius:18px;padding:12px;text-align:center;flex:1}
+.box span{display:block;color:var(--lav);font-size:12px}.box b{font:700 40px Fredoka,sans-serif;color:var(--yel)}
+.box button{background:#24307a;color:#fff;border:0;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer;margin:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.chip{background:none;border:2px solid var(--lav);color:var(--lav);border-radius:20px;padding:6px 14px;cursor:pointer;font:inherit;font-size:13px}
+.chip.on{background:var(--yel);border-color:var(--yel);color:#050d33}
+.err{color:#ff8a8a;font-size:13px;text-align:center;min-height:20px}
+.rec{flex-direction:column;align-items:flex-start;gap:6px;cursor:default}
+.rec .row{display:flex;justify-content:space-between;width:100%;align-items:center}
+.tag{background:var(--yel);color:#050d33;border-radius:12px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.bar{height:6px;border-radius:3px;background:#24307a;width:100%;overflow:hidden}.bar i{display:block;height:100%;background:var(--pink)}
+.sum{background:#1a2668;border-radius:14px;padding:10px 14px;font-size:13px;color:var(--lav);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.sum a{color:var(--yel);cursor:pointer;text-decoration:underline;margin-left:auto}
+.empty{text-align:center;color:var(--lav);padding:30px 10px}
+.center{margin:auto;text-align:center}
+</style></head><body><div id="appwrap"><div id="deco"></div><div id="app"></div></div>
+<script>
+// decorative floating shapes
+(function(){
+ const deco=document.getElementById('deco');
+ const items=[
+  {c:'d-ring',s:'top:6%;left:-18px;width:70px;height:70px;animation-delay:0s'},
+  {c:'d-ring',s:'top:70%;right:-20px;width:90px;height:90px;animation-delay:1.2s'},
+  {c:'d-ring',s:'bottom:4%;left:10%;width:40px;height:40px;animation-delay:.6s'},
+  {c:'d-dot',s:'top:18%;right:8%;width:14px;height:14px;animation-delay:.3s'},
+  {c:'d-dot',s:'top:40%;left:4%;width:10px;height:10px;animation-delay:1s'},
+  {c:'d-dot',s:'bottom:20%;right:16%;width:18px;height:18px;animation-delay:.8s'},
+  {c:'d-q',s:'top:10%;right:6%;font-size:46px;animation-delay:.2s',t:'?'},
+  {c:'d-q',s:'bottom:14%;left:-6px;font-size:60px;animation-delay:.9s',t:'?'},
+  {c:'d-q',s:'top:55%;right:-10px;font-size:38px;animation-delay:1.4s',t:'?'},
+ ];
+ items.forEach(it=>{const d=document.createElement('div');d.className=it.c;d.style.cssText=it.s;if(it.t)d.textContent=it.t;deco.appendChild(d)});
+})();
+
+const CATS={
+movies:{n:"Movies / Shows",e:"🎬",d:"Films & episodes",node:{
+ Comedy:[["Home Alone",103],["Paddington",95],["Sitcom episode",22]],
+ Action:[["Mad Max: Fury Road",120],["Baby Driver",113],["Action series episode",45]],
+ Drama:[["The Pursuit of Happyness",117],["Good Will Hunting",126],["Drama series episode",45]],
+ Animation:[["Coco",105],["Inside Out",95],["Animated series episode",25]],
+ Horror:[["A Quiet Place",90],["Short horror film",45],["Horror series episode",50]],
+ Romance:[["The Notebook",123],["Pride & Prejudice",127],["Romance series episode",45]],
+ Adventure:[["Indiana Jones",115],["Jumanji",119],["Adventure series episode",45]]
+}},
+gaming:{n:"Gaming",e:"🎮",d:"Quick rounds & story games",node:{
+ "Online / Multiplayer":[["Quick online match",10],["Party game round",15],["Ranked session",60]],
+ "Story-based":[["Short story chapter",30],["Adventure chapter",60],["Co-op story chapter",90]],
+ Casual:[["Minecraft building session",45],["Racing game session",20],["Puzzle levels",15]]
+}},
+hobbies:{n:"Hobbies",e:"🎨",d:"Create, unwind & grow",node:{
+ Physical:{
+  Drawing:[["Quick sketch",15],["Portrait study",60],["Detailed artwork",120]],
+  Embroidery:[["Simple stitch bookmark",30],["Small hoop pattern",90],["Floral hoop",180]],
+  "Pottery and sculpting":[["Small clay figure",45],["Pinch pot",60],["Sculpted piece",120]]
+ },
+ Meditative:{
+  Reading:[["Short story or chapter",20],["A few chapters",45],["Half a book",90]],
+  Journaling:[["Quick daily entry",10],["Reflective journaling",30],["Deep journaling session",60]],
+  Coloring:[["Small coloring page",15],["Mandala page",30],["Full coloring page",45]]
+ },
+ "Skill-based":{
+  "Playing an instrument":[["Quick practice",15],["Practice session",30],["Practice + new piece",60]],
+  "Learning a new language":[["Quick vocab review",10],["Lesson + practice",30],["Deep study session",60]],
+  Exercising:[["Quick stretch/workout",15],["Full workout",45],["Long workout + cardio",60]]
+ }
+}},
+cooking:{n:"Cooking",e:"🍳",d:"Bake, cook & snack",node:{
+ Dessert:{
+  "Baked & Cakes":[["Mug cake",10],["Cupcakes",45],["Full cake",90]],
+  "Cold & Frozen":[["Ice cream bowl",10],["Frozen yogurt bark",20],["Popsicles",30]],
+  "Pies & Fruit":[["Fruit salad",10],["Mini fruit tarts",45],["Full fruit pie",90]]
+ },
+ "Full meal":{
+  "Meat & Poultry":[["Grilled chicken breast",25],["Roast chicken",90],["Beef stew",120]],
+  Seafood:[["Pan-seared fish",20],["Shrimp pasta",30],["Baked salmon",35]],
+  "Pastas & Carbs":[["Quick pasta",20],["Homemade pasta",45],["Lasagna",90]]
+ },
+ Snacks:{
+  "Savory & Crunchy":[["Popcorn",10],["Nachos",15],["Chips & dip",10]],
+  "Healthy & Natural":[["Fruit & nut mix",5],["Energy balls",20],["Veggie sticks & hummus",10]],
+  "Light Pastries & Bites":[["Mini muffins",25],["Puff pastry bites",30],["Mini sandwiches",15]]
+ }
+}}};
+
+const S={screen:'welcome',h:1,m:0,cat:null,path:[]};
+const $=document.getElementById("app");
+const total=()=>S.h*60+S.m;
+const fmt=m=>m>=60?`${Math.floor(m/60)}h${m%60?" "+m%60+"m":""}`:`${m} min`;
+
+function nodeAt(path){let n=CATS[S.cat].node;for(const k of path)n=n[k];return n}
+function depthOf(node){let d=1;let n=node;while(!Array.isArray(n)){n=n[Object.keys(n)[0]];d++}return d}
+
+function go(screen){S.screen=screen;S.err='';draw()}
+function pickTime(){if(total()<=0){S.err="Please enter a time greater than zero.";draw();return}go('category')}
+function pickCategory(k){S.cat=k;S.path=[];advance()}
+function pickDrill(k){S.path=[...S.path,k];advance()}
+function advance(){const n=nodeAt(S.path);S.screen=Array.isArray(n)?'results':'drill';draw()}
+function back(){
+ if(S.screen==='time'){go('welcome');return}
+ if(S.screen==='category'){go('time');return}
+ if(S.screen==='drill'){ if(S.path.length===0){go('category')} else {S.path=S.path.slice(0,-1);advance()} return}
+ if(S.screen==='results'){ S.path=S.path.slice(0,-1); advance(); return }
+}
+function adj(k,d){S[k]=Math.max(0,S[k]+d);if(k=="m"&&S.m>=60){S.m=0;S.h++}if(k=="m"&&S.m<0)S.m=0;if(S.h>12)S.h=12;S.err="";draw()}
+
+function dots(cur,max){return `<div class="dots">${Array.from({length:max}).map((_,i)=>`<i class="${i<cur?"on":""}"></i>`).join("")}</div>`}
+function topbar(canBack,cur,max){return `<div class="top">${canBack?`<button class="back" onclick="back()">← Back</button>`:""}${dots(cur,max)}</div>`}
+function summary(){
+ const crumb=[CATS[S.cat].e+" "+CATS[S.cat].n,...S.path].join(" › ");
+ return `<div class="sum">⏱ ${fmt(total())} · ${crumb}<a onclick="go('category')">Restart</a></div>`}
+
+function draw(){
+ let h="";
+ if(S.screen==='welcome'){
+  h=`<div class="center"><div class="logo">Break<br>out</div><p class="sub" style="margin-top:20px">Your free time deserves a better choice</p><p style="color:var(--yel);letter-spacing:2px;font-size:13px">MOVIES . GAMES . FUN</p></div><button class="btn" onclick="go('time')">Get Started</button>`
+ }
+ else if(S.screen==='time'){
+  h=`${topbar(true,1,5)}<h2>How much free time do you have?</h2><p class="sub">Enter hours and minutes</p>
+  <div class="time"><div class="box"><span>Hours</span><button onclick="adj('h',-1)">−</button><b>${S.h}</b><button onclick="adj('h',1)">+</button></div>
+  <div class="box"><span>Minutes</span><button onclick="adj('m',-5)">−</button><b>${String(S.m).padStart(2,"0")}</b><button onclick="adj('m',5)">+</button></div></div>
+  <div class="chips">${[[30,"30 min"],[45,"45 min"],[60,"1 h"],[90,"1.5 h"],[120,"2 h"],[180,"3 h"]].map(([v,l])=>`<button class="chip ${total()==v?"on":""}" onclick="S.h=${Math.floor(v/60)};S.m=${v%60};draw()">${l}</button>`).join("")}</div>
+  <div class="err">${S.err||''}</div><button class="btn" onclick="pickTime()">Next</button>`
+ }
+ else if(S.screen==='category'){
+  h=`${topbar(true,2,5)}<h2>What are you in the mood for?</h2><p class="sub">Choose a category</p>${Object.entries(CATS).map(([k,c])=>`<button class="opt" onclick="pickCategory('${k}')"><span class="e">${c.e}</span><span><b>${c.n}</b><small>${c.d}</small></span></button>`).join("")}`
+ }
+ else if(S.screen==='drill'){
+  const n=nodeAt(S.path);
+  const max=2+depthOf(CATS[S.cat].node);
+  const cur=2+S.path.length;
+  h=`${topbar(true,cur,max)}<div class="crumb">${CATS[S.cat].e} ${[CATS[S.cat].n,...S.path].join(" › ")}</div><h2>Choose a type</h2><p class="sub">Pick what fits your mood</p>${Object.keys(n).map(k=>`<button class="opt" onclick="pickDrill('${k}')"><span class="e">${CATS[S.cat].e}</span><b>${k}</b></button>`).join("")}`
+ }
+ else if(S.screen==='results'){
+  const all=nodeAt(S.path),fit=all.filter(a=>a[1]<=total()).sort((a,b)=>b[1]-a[1]);
+  const max=2+depthOf(CATS[S.cat].node);
+  h=`${topbar(true,max,max)}<h2>Your picks</h2>${summary()}${fit.length?fit.map(([n,d])=>`<div class="card rec"><div class="row"><b>${n}</b><span class="tag">${fmt(d)}</span></div><div class="bar"><i style="width:${Math.round(d/total()*100)}%"></i></div><small style="color:var(--lav)">Uses ${Math.round(d/total()*100)}% of your free time</small></div>`).join(""):`<div class="empty">😕 Nothing here fits ${fmt(total())}.<br>Try a longer time or another type.</div>`}
+  <button class="btn secondary" onclick="back()" style="margin-top:4px">Change type</button>`
+ }
+ $.innerHTML=h;window.scrollTo(0,0);
+}
+draw();
+</script></body></html>
